@@ -1,0 +1,74 @@
+{
+  "name": "zenit",
+  "productName": "ZENIT",
+  "version": "1.2.0",
+  "description": "ZENIT — map of zenith projections of stars and planets, zenith passage calculator for a ground area and finder of anomalous zenith intersection points",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "debug": "electron . --devtools --log",
+    "verify": "node tools/verify.js",
+    "catalog": "node --max-old-space-size=6000 tools/build-catalog.js",
+    "dist": "electron-builder --win nsis portable"
+  },
+  "author": { "name": "Apostol A. V.", "email": "apostolgroup@gmail.com" },
+  "homepage": "https://github.com/ignisdomini/zenith",
+  "repository": { "type": "git", "url": "https://github.com/ignisdomini/zenith.git" },
+  "keywords": ["astronomy", "zenith", "substellar point", "star catalog", "tycho-2", "hyg", "leaflet", "electron", "kml"],
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "leaflet": "^1.9.4"
+  },
+  "build": {
+    "appId": "ru.zenit.desktop",
+    "productName": "ZENIT",
+    "executableName": "zenit",
+    "copyright": "© 2026 Apostol A. V. · apostolgroup@gmail.com",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "node_modules/leaflet/dist/**/*",
+      "node_modules/astronomy-engine/astronomy.browser.min.js",
+      "node_modules/astronomy-engine/package.json",
+      "package.json"
+    ],
+    "extraResources": [{ "from": "catalog", "to": "catalog" }],
+    "asar": true,
+    "compression": "maximum",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "icon": "build/icon.ico",
+      "legalTrademarks": "ZENIT",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "portable": { "artifactName": "zenit-portable-${version}.${ext}" },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerLanguages": ["en_US", "ru_RU"],
+      "language": "1033",
+      "displayLanguageSelector": true,
+      "multiLanguageInstaller": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "ZENIT",
+      "uninstallDisplayName": "ZENIT ${version}",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh",
+      "artifactName": "zenit-setup-${version}.${ext}"
+    }
+  }
+}

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' app:; img-src 'self' app: data: blob:; style-src 'self' 'unsafe-inline' app:; script-src 'self' app:; worker-src 'self' app: blob:; connect-src 'self' app:">
+<title>ZENIT</title>
+<link rel="stylesheet" href="../../node_modules/leaflet/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="brand-mark">✦</span><span class="brand-name" data-i18n="app.name">ZENIT</span><span class="brand-sub" data-i18n="app.sub"></span></div>
+  <div class="search">
+    <input id="search" type="search" data-i18n-ph="search.ph" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <div class="clock">
+    <div class="clock-read">
+      <div id="clock-date" class="clock-date">—</div>
+      <div id="clock-time" class="clock-time">—</div>
+    </div>
+    <div class="clock-ctl">
+      <button data-shift="-86400000" data-i18n="clock.minusDay" data-i18n-title="clock.minusDay.t"></button>
+      <button data-shift="-3600000" data-i18n="clock.minusHour" data-i18n-title="clock.minusHour.t"></button>
+      <button data-shift="-600000" data-i18n="clock.minus10" data-i18n-title="clock.minus10.t"></button>
+      <button id="play" class="play" data-i18n-title="clock.play.t">❚❚</button>
+      <select id="speed" data-i18n-title="clock.speed.t">
+        <option value="1">×1</option><option value="10">×10</option><option value="60">×60</option>
+        <option value="600">×600</option><option value="3600">×3600</option><option value="86400">×86400</option>
+      </select>
+      <button data-shift="600000" data-i18n="clock.plus10" data-i18n-title="clock.plus10.t"></button>
+      <button data-shift="3600000" data-i18n="clock.plusHour" data-i18n-title="clock.plusHour.t"></button>
+      <button data-shift="86400000" data-i18n="clock.plusDay" data-i18n-title="clock.plusDay.t"></button>
+      <button id="now" class="now" data-i18n="clock.now" data-i18n-title="clock.now.t"></button>
+      <input id="clock-input" type="datetime-local" step="1" data-i18n-title="clock.input.t">
+    </div>
+  </div>
+</header>
+
+<div class="main">
+  <aside class="side">
+    <nav class="tabs">
+      <button class="tab active" data-tab="sky" data-i18n="tab.sky"></button>
+      <button class="tab" data-tab="pass" data-i18n="tab.pass"></button>
+      <button class="tab" data-tab="anom" data-i18n="tab.anom"></button>
+      <button class="tab" data-tab="obj" data-i18n="tab.obj"></button>
+      <button class="tab" data-tab="set" data-i18n-title="tab.set.t">⚙</button>
+    </nav>
+
+    <!-- ── SKY ── -->
+    <section class="panel active" data-panel="sky">
+      <h3 data-i18n="sky.stars"></h3>
+      <label class="row"><input type="checkbox" id="o-stars" checked> <span data-i18n="sky.o.stars"></span></label>
+      <label class="row"><input type="checkbox" id="o-starLabels" checked> <span data-i18n="sky.o.labels"></span></label>
+      <label class="row"><input type="checkbox" id="o-deep" checked> <span data-i18n="sky.o.deep"></span></label>
+      <div class="field">
+        <div class="field-head"><span data-i18n="sky.mag"></span><b id="mag-val">12.5ᵐ</b></div>
+        <input type="range" id="o-magMax" min="1" max="12.5" step="0.5" value="12.5">
+        <div class="hint" data-i18n="sky.mag.hint"></div>
+      </div>
+      <div class="field">
+        <div class="field-head"><span data-i18n="sky.density"></span><b id="lbl-val"></b></div>
+        <input type="range" id="o-labelDensity" min="0.5" max="2" step="0.5" value="1">
+      </div>
+      <h3 data-i18n="sky.solar"></h3>
+      <label class="row"><input type="checkbox" id="o-bodies" checked> <span data-i18n="sky.o.bodies"></span></label>
+      <label class="row"><input type="checkbox" id="o-bodyTrails"> <span data-i18n="sky.o.trails"></span></label>
+      <h3 data-i18n="sky.look"></h3>
+      <label class="row"><input type="checkbox" id="o-night" checked> <span data-i18n="sky.o.night"></span></label>
+      <label class="row"><input type="checkbox" id="o-grid"> <span data-i18n="sky.o.grid"></span></label>
+      <div class="catalog-card" id="catalog-card" data-i18n="sky.catalog.loading"></div>
+    </section>
+
+    <!-- ── PASSAGE ── -->
+    <section class="panel" data-panel="pass">
+      <h3 data-i18n="pass.area"></h3>
+      <div class="btns">
+        <button id="area-draw" class="primary" data-i18n="pass.draw"></button>
+        <button id="area-square" data-i18n="pass.square"></button>
+        <input id="area-km" type="number" min="0.01" step="0.1" value="1" data-i18n-title="pass.km.t" class="km"><span class="unit" data-i18n="unit.km"></span>
+      </div>
+      <div class="grid4">
+        <label><span data-i18n="pass.n"></span><input id="a-n" type="number" step="0.000001"></label>
+        <label><span data-i18n="pass.s"></span><input id="a-s" type="number" step="0.000001"></label>
+        <label><span data-i18n="pass.w"></span><input id="a-w" type="number" step="0.000001"></label>
+        <label><span data-i18n="pass.e"></span><input id="a-e" type="number" step="0.000001"></label>
+      </div>
+      <div class="hint" id="area-info" data-i18n="pass.none"></div>
+      <div class="btns"><button id="area-apply" data-i18n="pass.apply"></button><button id="area-fit" data-i18n="pass.fit"></button><button id="area-clear" data-i18n="pass.clear"></button></div>
+
+      <h3 data-i18n="pass.period"></h3>
+      <div class="grid2">
+        <label><span data-i18n="pass.from"></span><input id="p-from" type="datetime-local" step="1"></label>
+        <label><span data-i18n="pass.to"></span><input id="p-to" type="datetime-local" step="1"></label>
+      </div>
+      <div class="chips" id="p-presets">
+        <button data-days="0.0417" data-i18n="period.hour"></button><button data-days="1" data-i18n="period.day"></button><button data-days="7" data-i18n="period.week"></button>
+        <button data-days="30" data-i18n="period.month"></button><button data-days="365" class="on" data-i18n="period.year"></button>
+      </div>
+
+      <h3 data-i18n="pass.what"></h3>
+      <label class="row"><input type="checkbox" id="s-stars" checked> <span data-i18n="pass.starsTo"></span> <input id="s-mag" type="number" class="mini" min="-2" max="12.5" step="0.5" value="12.5">ᵐ</label>
+      <div class="bodies-pick" id="s-bodies"></div>
+
+      <div class="btns"><button id="s-run" class="primary wide" data-i18n="pass.run"></button><button id="s-cancel" hidden data-i18n="common.stop"></button></div>
+      <div class="progress" id="s-progress" hidden><div></div></div>
+      <div class="hint" id="s-summary"></div>
+      <div class="table-wrap">
+        <table class="results" id="s-table">
+          <thead><tr><th data-i18n="pass.th.obj"></th><th>ᵐ</th><th data-i18n="pass.th.first"></th><th data-i18n="pass.th.dur"></th><th data-i18n="pass.th.count"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="btns"><span class="unit" data-i18n="common.export"></span><button id="s-export" data-fmt="csv" disabled>CSV</button><button data-exp="s" data-fmt="kml" disabled>KML</button><button data-exp="s" data-fmt="kmz" disabled>KMZ</button></div>
+    </section>
+
+    <!-- ── ANOMALIES ── -->
+    <section class="panel" data-panel="anom">
+      <h3 data-i18n="an.title"></h3>
+      <div class="hint" data-i18n="an.hint"></div>
+      <div class="chips" id="an-period">
+        <button data-ms="3600000" data-i18n="period.hour"></button><button data-ms="86400000" class="on" data-i18n="period.day"></button><button data-ms="604800000" data-i18n="period.week"></button>
+        <button data-ms="2592000000" data-i18n="period.month"></button><button data-ms="31557600000" data-i18n="period.year"></button>
+      </div>
+      <div class="grid2">
+        <label><span data-i18n="an.region"></span><select id="an-region"><option value="world" data-i18n="an.world"></option><option value="area" data-i18n="an.areaOpt"></option></select></label>
+        <label><span data-i18n="an.magTo"></span><input id="an-mag" type="number" min="-2" max="12.5" step="0.5" value="8"></label>
+      </div>
+
+      <label class="row method"><input type="checkbox" id="an-density" checked> <b data-i18n="an.density"></b></label>
+      <div class="method-body">
+        <div class="hint" data-i18n="an.density.hint"></div>
+        <div class="grid3">
+          <label><span data-i18n="an.cell"></span><select id="an-cell"><option value="2">2°</option><option value="1" selected>1°</option><option value="0.5">0.5°</option><option value="0.25">0.25°</option></select></label>
+          <label><span data-i18n="an.z"></span><input id="an-z" type="number" min="1" max="50" step="0.5" value="4"></label>
+          <label><span data-i18n="an.base"></span><select id="an-base"><option value="uniform" data-i18n="an.base.uniform"></option><option value="row" data-i18n="an.base.row"></option></select></label>
+        </div>
+      </div>
+
+      <label class="row method"><input type="checkbox" id="an-overlap" checked> <b data-i18n="an.overlap"></b></label>
+      <div class="method-body">
+        <div class="hint" data-i18n="an.overlap.hint"></div>
+        <div class="grid3">
+          <label><span data-i18n="an.tol"></span><input id="an-tol" type="number" min="0.1" max="600" step="0.5" value="3"></label>
+          <label><span data-i18n="an.group"></span><input id="an-group" type="number" min="2" max="10" step="1" value="3"></label>
+          <label class="chk"><input type="checkbox" id="an-nodouble" checked> <span data-i18n="an.nodouble"></span></label>
+        </div>
+        <div class="grid3"><label><span data-i18n="an.maxE"></span><input id="an-maxE" type="number" min="0.0001" max="1000" step="0.1" value="1"></label></div>
+        <div class="hint" data-i18n="an.maxE.hint"></div>
+      </div>
+
+      <label class="row method"><input type="checkbox" id="an-conj" checked> <b data-i18n="an.conj"></b></label>
+      <div class="method-body">
+        <div class="hint" data-i18n="an.conj.hint"></div>
+        <div class="grid3">
+          <label><span data-i18n="an.dt"></span><input id="an-dt" type="number" min="0.1" max="240" step="0.5" value="4"></label>
+          <label><span data-i18n="an.cmag"></span><input id="an-cmag" type="number" min="-2" max="10" step="0.5" value="4.5"></label>
+          <label class="chk"><input type="checkbox" id="an-bb" checked> <span data-i18n="an.bb"></span></label>
+        </div>
+      </div>
+
+      <div class="btns"><button id="an-run" class="primary wide" data-i18n="an.run"></button><button id="an-cancel" hidden data-i18n="common.stop"></button></div>
+      <div class="progress" id="an-progress" hidden><div></div></div>
+      <div class="hint" id="an-summary"></div>
+      <label class="row"><input type="checkbox" id="an-heat" checked> <span data-i18n="an.heat"></span></label>
+      <div class="chips small" id="an-filter">
+        <button data-type="all" class="on" data-i18n="an.f.all"></button><button data-type="density" data-i18n="an.f.density"></button><button data-type="overlap" data-i18n="an.f.overlap"></button><button data-type="conj" data-i18n="an.f.conj"></button>
+      </div>
+      <div class="table-wrap tall">
+        <table class="results" id="an-table">
+          <thead><tr><th></th><th data-i18n="an.th.point"></th><th data-i18n="an.th.when"></th><th data-i18n="an.th.score"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="btns"><span class="unit" data-i18n="common.export"></span><button id="an-export" data-fmt="csv" disabled>CSV</button><button data-exp="an" data-fmt="kml" disabled>KML</button><button data-exp="an" data-fmt="kmz" disabled>KMZ</button><button id="an-clear" data-i18n="an.clear"></button></div>
+    </section>
+
+    <!-- ── OBJECT ── -->
+    <section class="panel" data-panel="obj">
+      <div id="obj-empty" class="empty" data-i18n="obj.empty"></div>
+      <div id="obj-card" hidden>
+        <div class="obj-head"><div class="obj-glyph" id="obj-glyph">✦</div><div><div class="obj-name" id="obj-name"></div><div class="obj-sub" id="obj-sub"></div></div></div>
+        <dl class="kv" id="obj-kv"></dl>
+        <div class="btns">
+          <button id="obj-goto" class="primary" data-i18n="obj.goto"></button>
+          <label class="row inline"><input type="checkbox" id="obj-follow"> <span data-i18n="obj.follow"></span></label>
+          <button id="obj-track" data-i18n="obj.track"></button>
+        </div>
+        <h3 data-i18n="obj.passes.h"></h3>
+        <div class="hint" id="obj-pass-hint" data-i18n="obj.passes.need"></div>
+        <div class="btns"><button id="obj-passes" disabled data-i18n="obj.passes.run"></button></div>
+        <div class="table-wrap">
+          <table class="results" id="obj-table">
+            <thead><tr><th>#</th><th data-i18n="obj.th.in"></th><th data-i18n="obj.th.out"></th><th data-i18n="obj.th.dur"></th><th>φ</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="btns"><span class="unit" data-i18n="common.export"></span><button id="obj-export" data-fmt="csv" disabled>CSV</button><button data-exp="obj" data-fmt="kml" disabled>KML</button><button data-exp="obj" data-fmt="kmz" disabled>KMZ</button></div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section class="panel" data-panel="set">
+      <h3 data-i18n="set.lang"></h3>
+      <div class="grid2">
+        <label><span data-i18n="set.lang"></span><select id="st-lang"><option value="en">English</option><option value="ru">Русский</option></select></label>
+      </div>
+      <div class="hint" data-i18n="set.lang.hint"></div>
+      <h3 data-i18n="set.time"></h3>
+      <div class="grid2">
+        <label><span data-i18n="set.tz"></span><select id="st-tz"><option value="local" data-i18n="set.tz.local"></option><option value="utc">UTC</option></select></label>
+        <label><span>DUT1 = UT1 − UTC, s</span><input id="st-dut1" type="number" step="0.001" min="-0.9" max="0.9" value="0"></label>
+      </div>
+      <div class="hint" data-i18n="set.dut1.hint"></div>
+      <h3 data-i18n="set.maps"></h3>
+      <label class="row"><input type="checkbox" id="st-offline"> <span data-i18n="set.offline"></span></label>
+      <div class="hint" id="st-cache" data-i18n="set.cache.counting"></div>
+      <div class="btns"><button id="st-cache-open" data-i18n="set.cache.open"></button><button id="st-cache-clear" data-i18n="set.cache.clear"></button></div>
+      <h3 data-i18n="set.about"></h3>
+      <div class="about dev-card">
+        <p><b data-i18n="app.name"></b> — <span data-i18n="app.sub"></span></p>
+        <p><span data-i18n="set.about.dev"></span>: <b data-i18n="set.about.devName"></b></p>
+        <p><span data-i18n="set.about.phone"></span>: <a href="tel:+79258880866" target="_blank">+7 925 888-08-66</a></p>
+        <p><span data-i18n="set.about.mail"></span>: <a href="mailto:apostolgroup@gmail.com" target="_blank">apostolgroup@gmail.com</a></p>
+      </div>
+      <h3 data-i18n="set.accuracy"></h3>
+      <div class="about">
+        <p data-i18n="set.acc.1"></p>
+        <p data-i18n="set.acc.2"></p>
+        <p data-i18n="set.acc.3"></p>
+      </div>
+      <h3 data-i18n="set.data"></h3>
+      <div class="about">
+        <p data-i18n="set.data.1"></p>
+        <p data-i18n="set.data.2"></p>
+        <p id="st-version"></p>
+      </div>
+    </section>
+  </aside>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="layer-box" id="layer-box">
+      <div class="layer-title" data-i18n="layers.base"></div>
+      <div id="base-list"></div>
+      <div class="layer-title" data-i18n="layers.over"></div>
+      <div id="overlay-list"></div>
+    </div>
+    <div class="map-hint" id="map-hint" hidden></div>
+  </div>
+</div>
+
+<footer class="status">
+  <span id="st-cursor">φ —  λ —</span>
+  <span id="st-zenith"></span>
+  <span class="grow"></span>
+  <span id="st-drawn"></span>
+  <span id="st-zoom"></span>
+</footer>
+
+<div class="loading" id="loading">
+  <div class="loading-box">
+    <div class="brand-mark big">✦</div>
+    <div class="loading-title" data-i18n="app.name">ZENIT</div>
+    <div class="loading-text" id="loading-text" data-i18n="loading.catalog"></div>
+    <div class="progress"><div id="loading-bar"></div></div>
+  </div>
+</div>
+
+<script src="../../node_modules/leaflet/dist/leaflet.js"></script>
+<script src="../../node_modules/astronomy-engine/astronomy.browser.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/astro.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/sky-layer.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/area.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

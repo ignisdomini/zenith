@@ -1,0 +1,10 @@
+node_modules/
+dist/
+# catalog sources (~200 MB) and the built catalog (~80 MB) — run `npm run catalog`
+data/
+catalog/
+*.part
+builder-debug.yml
+*.log
+.DS_Store
+Thumbs.db
